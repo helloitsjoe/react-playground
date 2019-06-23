@@ -1,0 +1,20 @@
+body {
+  background-color: black;
+}
+
+.main {
+  text-align: center;
+  margin: auto;
+}
+
+.tile {
+  width: 1em;
+  height: 1em;
+  margin: 2px;
+  background-color: #222;
+  display: inline-block;
+}
+
+.snake {
+  background-color: limegreen;
+}
