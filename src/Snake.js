@@ -1,24 +1,37 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import cx from 'classnames';
 
 import app from './app.css';
 
-const createGrid = (size = 20) => {
-  const row = new Array(size).fill({});
-  const rows = new Array(size).fill(row);
-  return rows;
-}
+const createGrid = (size = 20) => new Array(size).fill(new Array(size).fill({}));
 
 const grid = createGrid();
-const middle = Math.floor(grid.length / 2);
+const middleOfScreen = Math.floor(grid.length / 2);
 
 export default function Snake() {
-  const [headX, setHeadX] = useState(middle);
-  const [headY, setHeadY] = useState(middle);
+  // const [headX, setHeadX] = useState(middleOfScreen);
+  // const [headY, setHeadY] = useState(middleOfScreen);
   const [direction, setDirection] = useState('E');
+  const [position, dispatch] = useReducer(
+    ([x, y]) => {
+      switch (direction) {
+        case 'N':
+          return [x, y - 1];
+        case 'E':
+          return [x + 1, y];
+        case 'S':
+          return [x, y + 1];
+        case 'W':
+          return [x - 1, y];
+        default:
+          return [x, y];
+      }
+    },
+    [middleOfScreen, middleOfScreen]
+  );
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = e => {
       const keys = {
         ArrowLeft: 'W',
         ArrowRight: 'E',
@@ -27,42 +40,34 @@ export default function Snake() {
       };
 
       keys[e.key] && setDirection(keys[e.key]);
-    }
+    };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-
   useEffect(() => {
-    const id = setInterval(() => {
-      const setDirectionMap = {
-        N: () => setHeadY(y => y - 1),
-        S: () => setHeadY(y => y + 1), 
-        W: () => setHeadX(x => x - 1), 
-        E: () => setHeadX(x => x + 1) 
-      };
-
-      setDirectionMap[direction]();
-    }, 500);
+    const id = setInterval(dispatch, 500);
 
     return () => clearInterval(id);
-  }, [direction]);
-  
+  }, [dispatch]);
+
+  const [x, y] = position;
+
   return (
     <div className={app.main}>
       {grid.map((row, i) => (
-        <div key={i} >
+        <div key={i}>
           {row.map((tile, j) => (
             <div
               key={j}
               className={cx(app.tile, {
-                [app.snake]: i === headY && j === headX
+                [app.snake]: i === y && j === x,
               })}
             />
           ))}
-       </div>
+        </div>
       ))}
     </div>
-  )
+  );
 }
